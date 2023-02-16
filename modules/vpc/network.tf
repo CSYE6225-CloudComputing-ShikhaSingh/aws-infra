@@ -59,7 +59,7 @@ resource "aws_route_table" "private" {
 resource "aws_route" "public" {
 
   route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
+  destination_cidr_block = var.destination_cidr
   gateway_id             = aws_internet_gateway.internet_gateway.id
 
 }
