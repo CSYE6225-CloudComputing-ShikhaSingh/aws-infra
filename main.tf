@@ -20,6 +20,7 @@ module "vpc" {
   vpc_cidr          = var.vpc_cidr
   number_of_subnets = var.number_of_subnets
   region            = var.region
+  vpc_name = var.vpc_name
 }
 
 variable "vpc_name" {
@@ -43,3 +44,4 @@ variable "profile" {
   type = string
 
 }
+
