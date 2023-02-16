@@ -6,7 +6,6 @@ variable "environment_name" {
 
 variable "vpc_name" {
   type    = string
-  default="csye6225"
 }
 
 variable "number_of_subnets" {
@@ -29,3 +28,9 @@ variable "number_of_subnets" {
     default="10.0.0.0/16"
 }
 
+variable "destination_cidr"{
+    description = "The destination CIDR that you are working with"
+    type = string
+    default="0.0.0.0/0"
+
+}
