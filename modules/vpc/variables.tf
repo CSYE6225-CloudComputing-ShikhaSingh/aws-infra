@@ -22,6 +22,13 @@ variable "number_of_subnets" {
 
  }
 
+variable "ami_id" {
+  type=string
+}
+
+variable "instance_type" {
+  type=string
+}
  variable "area_subnet_cidr"{
     description = "The base CIDR that you are working with"
     type = string
