@@ -1,0 +1,30 @@
+name: terraform file validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    name: terraform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+         
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+
+
