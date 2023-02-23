@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 # aws-infra
 This repository is for AWS setup
-=======
+=====================================
 Terraform Infrastructure Setup Guide
 
 This guide provides instructions for setting up your infrastructure using Terraform. Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently.
@@ -91,4 +90,3 @@ This guide provided instructions for setting up our infrastructure using Terrafo
   
 
 
->>>>>>> b0400b2 (Adding the readme file)

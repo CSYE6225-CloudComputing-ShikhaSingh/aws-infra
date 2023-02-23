@@ -9,7 +9,6 @@ resource "aws_internet_gateway" "internet_gateway" {
 
 }
 
-
 # //Elastic IP for NAT gateway
 # resource "aws_eip" "nat_eip" {
 #   vpc        = true
@@ -77,8 +76,8 @@ resource "aws_route" "public" {
 // Association between public subnet and public route table
 
 resource "aws_route_table_association" "public" {
-  
-  count          =  length(aws_subnet.public)
+
+  count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 
@@ -87,8 +86,8 @@ resource "aws_route_table_association" "public" {
 // Association between private subnet and private route table
 
 resource "aws_route_table_association" "private" {
- 
-count          =  length(aws_subnet.private)  
+
+  count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
