@@ -57,6 +57,7 @@ resource "aws_instance" "ec2" {
   instance_type = var.instance_type
   vpc_security_group_ids = [aws_security_group.application.id]
   subnet_id = aws_subnet.public[0].id
+  key_name = var.key_name
   # other instance configuration parameters go here
 
   # attach EBS volumes to the instance
@@ -83,7 +84,7 @@ resource "aws_instance" "ec2" {
 
 resource "aws_security_group" "application" {
   name_prefix = "application_sg_"
-  description = "Security group for hosting web applications"
+  description = "Security group for hosting web application"
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
@@ -116,19 +117,10 @@ resource "aws_security_group" "application" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 3030
-    to_port     = 3030
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  
 }
+
+
+
 
 
