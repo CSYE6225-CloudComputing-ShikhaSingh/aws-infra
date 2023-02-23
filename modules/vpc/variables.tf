@@ -41,3 +41,8 @@ variable "destination_cidr"{
     default="0.0.0.0/0"
 
 }
+
+variable "key_name" {
+  type=string
+  default="ec2"
+}
