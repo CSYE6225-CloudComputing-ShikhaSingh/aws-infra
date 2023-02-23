@@ -21,6 +21,8 @@ module "vpc" {
   number_of_subnets = var.number_of_subnets
   region            = var.region
   vpc_name          = var.vpc_name
+  ami_id            = var.ami_id
+  instance_type     = var.instance_type
 }
 
 
@@ -44,5 +46,13 @@ variable "region" {
 variable "profile" {
   type = string
 
+}
+
+variable "ami_id" {
+  type = string
+}
+
+variable "instance_type" {
+  type = string
 }
 
