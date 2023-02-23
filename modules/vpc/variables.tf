@@ -5,44 +5,44 @@ variable "environment_name" {
 }
 
 variable "vpc_name" {
-  type    = string
+  type = string
 }
 
 variable "number_of_subnets" {
-   type=number
- }
+  type = number
+}
 
- variable "vpc_cidr" {
-   type=string
-   description = "The IP range to use for the vpc"
- }
+variable "vpc_cidr" {
+  type        = string
+  description = "The IP range to use for the vpc"
+}
 
- variable "region" {
-      type=string
+variable "region" {
+  type = string
 
- }
+}
 
 variable "ami_id" {
-  type=string
+  type = string
 }
 
 variable "instance_type" {
-  type=string
+  type = string
 }
- variable "area_subnet_cidr"{
-    description = "The base CIDR that you are working with"
-    type = string
-    default="10.0.0.0/16"
+variable "area_subnet_cidr" {
+  description = "The base CIDR that you are working with"
+  type        = string
+  default     = "10.0.0.0/16"
 }
 
-variable "destination_cidr"{
-    description = "The destination CIDR that you are working with"
-    type = string
-    default="0.0.0.0/0"
+variable "destination_cidr" {
+  description = "The destination CIDR that you are working with"
+  type        = string
+  default     = "0.0.0.0/0"
 
 }
 
 variable "key_name" {
-  type=string
-  default="ec2"
+  type    = string
+  default = "ec2"
 }

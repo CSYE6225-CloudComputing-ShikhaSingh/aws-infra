@@ -2,30 +2,29 @@
 
 resource "aws_vpc" "vpc" {
 
-      cidr_block           = var.vpc_cidr
-      enable_dns_hostnames = true
-      tags = {
-        Name = format("%s-%s", var.vpc_name, "vpc")
-      }
-  
+  cidr_block           = var.vpc_cidr
+  enable_dns_hostnames = true
+  tags = {
+    Name = format("%s-%s", var.vpc_name, "vpc")
+  }
+
 }
 
-data "aws_availability_zones" "available"{
-      state = "available"
-     filter { # Only fetch Availability Zones (no Local Zones)
+data "aws_availability_zones" "available" {
+  state = "available"
+  filter { # Only fetch Availability Zones (no Local Zones)
     name   = "opt-in-status"
     values = ["opt-in-not-required"]
   }
 
-} 
+}
 
 //public subnet 
 resource "aws_subnet" "public" {
   count                   = var.number_of_subnets
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block = cidrsubnet(var.area_subnet_cidr, 4, count.index + length(data.aws_availability_zones.available.names) + 1)
-  availability_zone_id = data.aws_availability_zones.available.zone_ids[count.index % length(data.aws_availability_zones.available.zone_ids)]
-
+  cidr_block              = cidrsubnet(var.area_subnet_cidr, 4, count.index + length(data.aws_availability_zones.available.names) + 1)
+  availability_zone_id    = data.aws_availability_zones.available.zone_ids[count.index % length(data.aws_availability_zones.available.zone_ids)]
   map_public_ip_on_launch = true
 
   tags = {
@@ -38,10 +37,10 @@ resource "aws_subnet" "public" {
 
 //private subnet
 resource "aws_subnet" "private" {
-  count      = var.number_of_subnets
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block           = cidrsubnet(var.area_subnet_cidr, 4, count.index)
-  availability_zone_id = data.aws_availability_zones.available.zone_ids[count.index % length(data.aws_availability_zones.available.zone_ids)]
+  count                   = var.number_of_subnets
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = cidrsubnet(var.area_subnet_cidr, 4, count.index)
+  availability_zone_id    = data.aws_availability_zones.available.zone_ids[count.index % length(data.aws_availability_zones.available.zone_ids)]
   map_public_ip_on_launch = false
 
   tags = {
@@ -53,24 +52,23 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_instance" "ec2" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.application.id]
-  subnet_id = aws_subnet.public[0].id
-  key_name = var.key_name
-  # other instance configuration parameters go here
+  subnet_id              = aws_subnet.public[0].id
+  key_name               = var.key_name
 
   # attach EBS volumes to the instance
   ebs_block_device {
-    device_name = "/dev/sdf"
-    volume_size = 50
-    volume_type = "gp2"
+    device_name           = "/dev/sdf"
+    volume_size           = 50
+    volume_type           = "gp2"
     delete_on_termination = true
   }
 
   root_block_device {
-    volume_size = 50
-    volume_type = "gp2"
+    volume_size           = 50
+    volume_type           = "gp2"
     delete_on_termination = true
   }
   disable_api_termination = false
@@ -99,7 +97,7 @@ resource "aws_security_group" "application" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
- ingress {
+  ingress {
     from_port   = 3030
     to_port     = 3030
     protocol    = "tcp"
@@ -117,7 +115,7 @@ resource "aws_security_group" "application" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
 }
 
 
