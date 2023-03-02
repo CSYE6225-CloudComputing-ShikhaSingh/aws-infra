@@ -67,23 +67,25 @@ resource "aws_instance" "ec2" {
   user_data = <<-EOF
                 #!/bin/bash
                 sudo touch .env\n
-                sudo echo "export DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
-                sudo echo "export DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
-                sudo echo "export DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
-                sudo echo "export S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
-                sudo echo "export DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
-                sudo echo "export DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
+                sudo echo "DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
+                sudo echo "DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
+                sudo echo "DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
+                sudo echo "S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
+                sudo echo "DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
+                sudo echo "DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
                 chown -R ec2-user:www-data /var/www
                 usermod -a -G www-data ec2-user
                 chmod +x /etc/environment
                 source /etc/environment
+                sudo systemctl daemon-reload
+                sudo systemctl start webapp.service
+                sudo systemctl enable webapp.service   
                 npx sequelize db:migrate
                 EOF
 
   tags = {
     Name = "csye6225-ec2-instance"
   }
-
   # attach EBS volumes to the instance
   ebs_block_device {
     device_name           = "/dev/sdf"
