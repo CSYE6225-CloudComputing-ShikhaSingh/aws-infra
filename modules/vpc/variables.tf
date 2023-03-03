@@ -47,51 +47,51 @@ variable "key_name" {
 }
 
 variable "db_instance_name" {
-    type    = string
+  type    = string
   default = "postgres-database"
 }
 
 
 variable "db_username" {
-      type    = string
+  type = string
 }
 
 variable "db_password" {
-        type    = string
+  type = string
 
 }
 
 variable "db_name" {
-          type    = string
+  type = string
 
 }
-variable "db_engine"{
-  type=string
+variable "db_engine" {
+  type = string
 }
-variable "db_engine_version"{
-  type=number
+variable "db_engine_version" {
+  type = number
 }
 variable "db_instance" {
-  type= string
-  default= "db.t3.micro"
+  type    = string
+  default = "db.t3.micro"
 }
 variable "db_port" {
-  type= number
-  default="5432"
+  type    = number
+  default = "5432"
 }
 
-variable "allocated_storage"{
-  type= number
-  default="10"
+variable "allocated_storage" {
+  type    = number
+  default = "10"
 }
 variable "identifier" {
-  type= string
+  type = string
 }
 variable "availability_zone" {
-  type= string
-  default="us-east-1a"
+  type    = string
+  default = "us-east-1a"
 }
 variable "AMIOwnerID" {
-  type= number
-  default="475967084164"
+  type    = number
+  default = "475967084164"
 }

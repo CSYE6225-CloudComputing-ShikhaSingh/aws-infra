@@ -27,8 +27,8 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "public-subnet-${count.index}"
-    Role        = "public"
+    Name = "public-subnet-${count.index}"
+    Role = "public"
     # Environment = var.environment_name
   }
 
@@ -43,15 +43,15 @@ resource "aws_subnet" "private" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name        = "private-subnet-${count.index}"
-    Role        = "private"
+    Name = "private-subnet-${count.index}"
+    Role = "private"
     # Environment = var.environment_name
   }
 
 }
 
 data "aws_ami" "ec2-ami" {
-  owners = ["${var.AMIOwnerID}"]
+  owners      = ["${var.AMIOwnerID}"]
   most_recent = true
 
 }
@@ -62,8 +62,8 @@ resource "aws_instance" "ec2" {
   vpc_security_group_ids = [aws_security_group.application.id]
   subnet_id              = aws_subnet.public[0].id
   key_name               = var.key_name
-  iam_instance_profile= aws_iam_instance_profile.ec2_profile.name
-  user_data = <<-EOF
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  user_data              = <<-EOF
                 #!/bin/bash
                 sudo touch .env\n
                 sudo echo "DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
@@ -99,7 +99,7 @@ resource "aws_instance" "ec2" {
     delete_on_termination = true
   }
   disable_api_termination = false
- 
+
 }
 
 resource "aws_security_group" "application" {
@@ -139,7 +139,7 @@ resource "aws_security_group" "application" {
   #   cidr_blocks = ["0.0.0.0/0"]
   # }
 
-    egress {
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -155,9 +155,9 @@ resource "aws_security_group" "database" {
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
     security_groups = [aws_security_group.application.id]
   }
   egress {
@@ -178,19 +178,19 @@ resource "aws_iam_policy" "WebAppS3_policy" {
   # Terraform's "jsonencode" function converts a
   # Terraform expression result to valid JSON syntax.
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "s3:GetObject",
-                "s3:ListAllMyBuckets",
-                "s3:PutObject",
-                "s3:DeleteObject"
-            ],
-            "Effect": "Allow",
-            "Resource": "${data.aws_s3_bucket.s3-bucket.arn}/*"
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : [
+          "s3:GetObject",
+          "s3:ListAllMyBuckets",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : "${data.aws_s3_bucket.s3-bucket.arn}/*"
 
-        }
+      }
     ]
 
   })
@@ -215,13 +215,13 @@ resource "aws_iam_role" "ec2-role" {
 }
 resource "aws_iam_role_policy_attachment" "rds_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
-  role = aws_iam_role.ec2-role.name
+  role       = aws_iam_role.ec2-role.name
 }
 
 // attachment of policy to iam role
 resource "aws_iam_role_policy_attachment" "WebAppS3_policy_attachment" {
   policy_arn = aws_iam_policy.WebAppS3_policy.arn
-  role = aws_iam_role.ec2-role.name
+  role       = aws_iam_role.ec2-role.name
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
@@ -231,7 +231,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 
 //generate random uuid for bucket name
 resource "random_string" "bucket_name" {
-  length = 4
+  length  = 4
   special = false
   upper   = false
   lower   = true
@@ -246,15 +246,15 @@ resource "aws_kms_key" "mykey" {
 }
 
 resource "aws_s3_bucket" "s3-private-bucket" {
-  bucket= "mybucket-${random_string.bucket_name.result}-${var.environment_name}"
-  acl    = "private"
+  bucket        = "mybucket-${random_string.bucket_name.result}-${var.environment_name}"
+  acl           = "private"
   force_destroy = true
 
 
-// delete bucket even if it is not empty
- lifecycle {
+  // delete bucket even if it is not empty
+  lifecycle {
     prevent_destroy = false
- }
+  }
 
   tags = {
     Environment = var.environment_name
@@ -277,7 +277,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   }
 }
 resource "aws_s3_bucket_public_access_block" "publicAccessBlockS3" {
-  bucket = aws_s3_bucket.s3-private-bucket.id
+  bucket             = aws_s3_bucket.s3-private-bucket.id
   ignore_public_acls = true
 }
 
@@ -286,9 +286,9 @@ resource "aws_s3_bucket_public_access_block" "publicAccessBlockS3" {
 resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_configuration" {
 
   bucket = aws_s3_bucket.s3-private-bucket.id
-   rule{
-    id = "storage-rule"
-    status= "Enabled"
+  rule {
+    id     = "storage-rule"
+    status = "Enabled"
 
     transition {
       days          = 30
@@ -313,21 +313,21 @@ resource "aws_db_parameter_group" "parameter_group" {
   description = "Parameter Group for Postgres 14"
 
   parameter {
-    name  = "max_connections"
-    value = "500"
+    name         = "max_connections"
+    value        = "500"
     apply_method = "pending-reboot"
 
   }
 
   parameter {
-    name = "rds.force_ssl"
-    value = "1"
+    name         = "rds.force_ssl"
+    value        = "1"
     apply_method = "immediate"
   }
 
   parameter {
-    name  = "idle_in_transaction_session_timeout"
-    value = "60000"
+    name         = "idle_in_transaction_session_timeout"
+    value        = "60000"
     apply_method = "pending-reboot"
 
   }
@@ -336,23 +336,23 @@ resource "aws_db_parameter_group" "parameter_group" {
 //RDS instance
 
 resource "aws_db_instance" "database_instance" {
-  db_name              = "${var.db_name}"
-  engine               = "${var.db_engine}"
-  engine_version       = "${var.db_engine_version}"
-  instance_class       = "${var.db_instance}"
-  username             = "${var.db_username}"
-  password             = "${var.db_password}"
-  port = "${var.db_port}"
-  identifier = "${var.identifier}"
-  availability_zone = "${var.availability_zone}"
+  db_name                = var.db_name
+  engine                 = var.db_engine
+  engine_version         = var.db_engine_version
+  instance_class         = var.db_instance
+  username               = var.db_username
+  password               = var.db_password
+  port                   = var.db_port
+  identifier             = var.identifier
+  availability_zone      = var.availability_zone
   vpc_security_group_ids = [aws_security_group.database.id]
-  parameter_group_name = aws_db_parameter_group.parameter_group.name
-  apply_immediately    = true
-  db_subnet_group_name = aws_db_subnet_group.private_subnet_for_rds_instances.name
-  multi_az = false
-  publicly_accessible = false
-  allocated_storage = "${var.allocated_storage}"
-  skip_final_snapshot = true
+  parameter_group_name   = aws_db_parameter_group.parameter_group.name
+  apply_immediately      = true
+  db_subnet_group_name   = aws_db_subnet_group.private_subnet_for_rds_instances.name
+  multi_az               = false
+  publicly_accessible    = false
+  allocated_storage      = var.allocated_storage
+  skip_final_snapshot    = true
 }
 
 data "aws_db_instance" "database_data" {
@@ -366,11 +366,11 @@ output "rds_endpoint" {
 
 resource "aws_db_subnet_group" "private_subnet_for_rds_instances" {
   name       = "private-subnet-for-rds-instances"
-  subnet_ids = [aws_subnet.private[0].id,aws_subnet.private[1].id]
+  subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id]
 
   tags = {
     //Environment = var.environment
-    Name= "RDS subnet group"
+    Name = "RDS subnet group"
   }
 }
 
