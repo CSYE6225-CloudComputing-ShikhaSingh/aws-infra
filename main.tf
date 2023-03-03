@@ -14,7 +14,6 @@ provider "aws" {
   region  = var.region
   profile = var.profile
 }
-
 module "vpc" {
   source            = "./modules/vpc"
   vpc_cidr          = var.vpc_cidr
