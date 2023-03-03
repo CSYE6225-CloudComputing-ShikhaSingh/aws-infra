@@ -103,7 +103,6 @@ resource "aws_instance" "ec2" {
  
 }
 
-
 resource "aws_security_group" "application" {
   name_prefix = "application_sg_"
   description = "Security group for hosting web application"
