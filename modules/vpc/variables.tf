@@ -11,7 +11,6 @@ variable "vpc_name" {
 variable "number_of_subnets" {
   type = number
 }
-
 variable "vpc_cidr" {
   type        = string
   description = "The IP range to use for the vpc"

@@ -7,7 +7,6 @@ resource "aws_vpc" "vpc" {
   tags = {
     Name = format("%s-%s", var.vpc_name, "vpc")
   }
-
 }
 
 data "aws_availability_zones" "available" {

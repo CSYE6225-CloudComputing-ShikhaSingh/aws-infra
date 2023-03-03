@@ -6,7 +6,6 @@ resource "aws_internet_gateway" "internet_gateway" {
     Name = format("%s-%s", var.vpc_name, "IGW")
     VPC  = aws_vpc.vpc.id
   }
-
 }
 
 # //Elastic IP for NAT gateway
