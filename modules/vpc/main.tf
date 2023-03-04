@@ -62,20 +62,23 @@ resource "aws_instance" "ec2" {
   vpc_security_group_ids = [aws_security_group.application.id]
   subnet_id              = aws_subnet.public[0].id
   key_name               = var.key_name
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
   user_data              = <<-EOF
                 #!/bin/bash
                 sudo touch .env\n
-                sudo echo "export DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
-                sudo echo "export DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
-                sudo echo "export DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
-                sudo echo "export S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
-                sudo echo "export DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
-                sudo echo "export DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
+                sudo echo "DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
+                sudo echo "DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
+                sudo echo "DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
+                sudo echo "S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
+                sudo echo "DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
+                sudo echo "DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
                 chown -R ec2-user:www-data /var/www
                 usermod -a -G www-data ec2-user
                 chmod +x /etc/environment
                 source /etc/environment
+                sudo systemctl daemon-reload
+                sudo systemctl start webapp.service
+                sudo systemctl enable webapp.service
                 npx sequelize db:migrate
                 EOF
 
@@ -223,8 +226,8 @@ resource "aws_iam_role_policy_attachment" "WebAppS3_policy_attachment" {
   role       = aws_iam_role.ec2-role.name
 }
 
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
+resource "aws_iam_instance_profile" "instance_profile" {
+  name = "ec2_instance_profile"
   role = aws_iam_role.ec2-role.name
 }
 
@@ -270,8 +273,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.mykey.arn
-      sse_algorithm     = "aws:kms"
+      //kms_master_key_id = aws_kms_key.mykey.arn
+      sse_algorithm     = "AES256"
     }
   }
 }
@@ -305,8 +308,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_configuration" {
   }
 }
 
-//parameter group
-resource "aws_db_parameter_group" "parameter_group" {
+# //parameter group
+resource "aws_db_parameter_group" "parameter_groups" {
   name        = "postgres-parameter-group"
   family      = "postgres14"
   description = "Parameter Group for Postgres 14"
@@ -345,9 +348,9 @@ resource "aws_db_instance" "database_instance" {
   identifier             = var.identifier
   availability_zone      = var.availability_zone
   vpc_security_group_ids = [aws_security_group.database.id]
-  parameter_group_name   = aws_db_parameter_group.parameter_group.name
+  parameter_group_name   = aws_db_parameter_group.parameter_groups.name
   apply_immediately      = true
-  db_subnet_group_name   = aws_db_subnet_group.private_subnet_for_rds_instances.name
+  db_subnet_group_name   = aws_db_subnet_group.private_subnet_for_rds_instance.name
   multi_az               = false
   publicly_accessible    = false
   allocated_storage      = var.allocated_storage
@@ -363,7 +366,7 @@ output "rds_endpoint" {
 }
 
 
-resource "aws_db_subnet_group" "private_subnet_for_rds_instances" {
+resource "aws_db_subnet_group" "private_subnet_for_rds_instance" {
   name       = "private-subnet-for-rds-instances"
   subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id]
 
