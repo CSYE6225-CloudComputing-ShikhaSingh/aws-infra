@@ -9,7 +9,7 @@ resource "aws_route53_record" "route53_record" {
 
 }
 
-data "aws_route53_zone" "selected"{
-  name = var.domain_name
+data "aws_route53_zone" "selected" {
+  name         = var.domain_name
   private_zone = false
 }
