@@ -106,3 +106,12 @@ variable "availability_zone" {
   type    = string
   default = "us-east-1a"
 }
+# variable "zone_id" {
+#   type    = string
+#   default = "Z04539818SKBG6FD18W3"
+# }
+
+variable "domain_name" {
+  type    = string
+  default = "dev.ss-csye6225.me"
+}
