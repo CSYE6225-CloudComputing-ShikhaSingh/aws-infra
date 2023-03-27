@@ -111,7 +111,7 @@ variable "availability_zone" {
 # }
 
 variable "domain_name" {
-  type    = string
+  type = string
 }
 
 variable "AWS_REGION" {
