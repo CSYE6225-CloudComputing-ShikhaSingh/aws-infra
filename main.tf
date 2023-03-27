@@ -112,7 +112,6 @@ variable "availability_zone" {
 
 variable "domain_name" {
   type    = string
-  default = "dev.ss-csye6225.me"
 }
 
 variable "AWS_REGION" {
