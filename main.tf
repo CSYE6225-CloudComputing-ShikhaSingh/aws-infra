@@ -32,6 +32,8 @@ module "vpc" {
   availability_zone = var.availability_zone
   identifier        = var.identifier
   AWS_REGION        = var.AWS_REGION
+  domain_name       = var.domain_name
+  zone_id           = var.zone_id
 }
 
 
@@ -105,10 +107,10 @@ variable "availability_zone" {
   type    = string
   default = "us-east-1a"
 }
-# variable "zone_id" {
-#   type    = string
-#   default = "Z04539818SKBG6FD18W3"
-# }
+variable "zone_id" {
+  type = string
+  //default = "Z04539818SKBG6FD18W3"
+}
 
 variable "domain_name" {
   type = string
