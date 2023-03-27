@@ -20,7 +20,6 @@ module "vpc" {
   number_of_subnets = var.number_of_subnets
   region            = var.region
   vpc_name          = var.vpc_name
-  // ami_id            = var.ami_id
   instance_type     = var.instance_type
   db_username       = var.db_username
   db_password       = var.db_password
@@ -32,7 +31,7 @@ module "vpc" {
   allocated_storage = var.allocated_storage
   availability_zone = var.availability_zone
   identifier        = var.identifier
-
+  AWS_REGION    = var.AWS_REGION
 }
 
 
@@ -114,4 +113,9 @@ variable "availability_zone" {
 variable "domain_name" {
   type    = string
   default = "dev.ss-csye6225.me"
+}
+
+variable "AWS_REGION"{
+  type= string
+  default = "us-east-1"
 }

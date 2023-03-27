@@ -72,6 +72,7 @@ resource "aws_instance" "ec2" {
                 sudo echo "S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
                 sudo echo "DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
                 sudo echo "DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
+                suo echo "AWS_REGION=${var.AWS_REGION}" >> /etc/environment
                 chown -R ec2-user:www-data /var/www
                 usermod -a -G www-data ec2-user
                 chmod +x /etc/environment
@@ -80,6 +81,11 @@ resource "aws_instance" "ec2" {
                 sudo systemctl start webapp.service
                 sudo systemctl enable webapp.service
                 npx sequelize db:migrate
+                sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+                -a fetch-config \
+                -m ec2 \
+                -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json \
+                -s
                 EOF
 
   tags = {
@@ -219,6 +225,13 @@ resource "aws_iam_role_policy_attachment" "rds_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
   role       = aws_iam_role.ec2-role.name
 }
+
+// Attaching cloudAgent policy to ec2 instance iam role
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  role       = aws_iam_role.ec2-role.name
+}
+
 
 // attachment of policy to iam role
 resource "aws_iam_role_policy_attachment" "WebAppS3_policy_attachment" {
@@ -375,7 +388,6 @@ resource "aws_db_subnet_group" "private_subnet_for_rds_instance" {
     Name = "RDS subnet group"
   }
 }
-
 
 
 
