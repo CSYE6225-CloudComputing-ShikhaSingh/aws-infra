@@ -31,7 +31,7 @@ module "vpc" {
   allocated_storage = var.allocated_storage
   availability_zone = var.availability_zone
   identifier        = var.identifier
-  AWS_REGION    = var.AWS_REGION
+  AWS_REGION        = var.AWS_REGION
 }
 
 
@@ -115,7 +115,7 @@ variable "domain_name" {
   default = "dev.ss-csye6225.me"
 }
 
-variable "AWS_REGION"{
-  type= string
+variable "AWS_REGION" {
+  type    = string
   default = "us-east-1"
 }

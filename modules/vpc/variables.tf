@@ -97,14 +97,14 @@ variable "AMIOwnerID" {
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }
 
 variable "domain_name" {
-  type    = string
+  type = string
 }
 
-variable "AWS_REGION"{
-  type= string
+variable "AWS_REGION" {
+  type    = string
   default = "us-east-1"
 }
