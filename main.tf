@@ -110,7 +110,6 @@ variable "availability_zone" {
 #   type = string
 #   default = "Z04539818SKBG6FD18W3"
 # }
-
 variable "domain_name" {
   type = string
 }

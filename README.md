@@ -84,14 +84,16 @@ By following these steps, you should now have a Route 53 hosted zone set up and 
 
 
 
-
 Creating Infrastructure
-
-1. Run the following command to see a preview of the changes Terraform will make:
+1. Run the following command to check the format of the terraform files
+   
+   terraform fmt
+   
+2. Run the following command to see a preview of the changes Terraform will make:
    
     terraform plan
 
-2. If the output is as expected, apply the changes by running the following command:
+3. If the output is as expected, apply the changes by running the following command:
    
    terraform apply
 
