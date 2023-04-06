@@ -29,7 +29,7 @@ data "template_file" "user_data" {
 }
 
 resource "aws_launch_template" "asg_launch_config" {
-  name             = "csye6225-webapp"
+  name                    = "csye6225-webapp"
   image_id                = data.aws_ami.ec2-ami.id
   instance_type           = "t2.micro"
   key_name                = var.key_name

@@ -9,7 +9,6 @@ resource "aws_lb" "load-balancer" {
   enable_deletion_protection = false
 
   tags = {
-
     Application = "WebApp"
 
   }
@@ -60,6 +59,13 @@ resource "aws_security_group" "load_balancer_sg" {
   ingress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 3030
+    to_port     = 3030
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
