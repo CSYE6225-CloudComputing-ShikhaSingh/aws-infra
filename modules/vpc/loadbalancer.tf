@@ -13,7 +13,6 @@ resource "aws_lb" "load-balancer" {
     Application = "WebApp"
 
   }
-
 }
 
 resource "aws_lb_listener" "lb_listener" {
