@@ -56,58 +56,58 @@ data "aws_ami" "ec2-ami" {
 
 }
 
-resource "aws_instance" "ec2" {
-  ami                    = data.aws_ami.ec2-ami.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.application.id]
-  subnet_id              = aws_subnet.public[0].id
-  key_name               = var.key_name
-  iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
-  user_data              = <<-EOF
-                #!/bin/bash
-                sudo touch .env\n
-                sudo echo "DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
-                sudo echo "DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
-                sudo echo "DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
-                sudo echo "S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
-                sudo echo "DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
-                sudo echo "DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
-                suo echo "AWS_REGION=${var.AWS_REGION}" >> /etc/environment
-                chown -R ec2-user:www-data /var/www
-                usermod -a -G www-data ec2-user
-                chmod +x /etc/environment
-                source /etc/environment
-                sudo systemctl daemon-reload
-                sudo systemctl start webapp.service
-                sudo systemctl enable webapp.service
-                npx sequelize db:migrate
-                sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-                -a fetch-config \
-                -m ec2 \
-                -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json \
-                -s
-                EOF
+# resource "aws_instance" "ec2" {
+#   ami                    = data.aws_ami.ec2-ami.id
+#   instance_type          = var.instance_type
+#   vpc_security_group_ids = [aws_security_group.application.id]
+#   subnet_id              = aws_subnet.public[0].id
+#   key_name               = var.key_name
+#   iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
+#   user_data              = <<-EOF
+#                 #!/bin/bash
+#                 sudo touch .env\n
+#                 sudo echo "DB_USERNAME=${aws_db_instance.database_instance.username}" >> /etc/environment
+#                 sudo echo "DB_PASSWORD=${aws_db_instance.database_instance.password}" >> /etc/environment
+#                 sudo echo "DB_HOSTNAME=${aws_db_instance.database_instance.address}" >> /etc/environment
+#                 sudo echo "S3_BUCKET_NAME=${aws_s3_bucket.s3-private-bucket.bucket}" >> /etc/environment
+#                 sudo echo "DB_ENDPOINT=${aws_db_instance.database_instance.endpoint}" >> /etc/environment
+#                 sudo echo "DB_NAME=${aws_db_instance.database_instance.db_name}" >> /etc/environment
+#                 suo echo "AWS_REGION=${var.AWS_REGION}" >> /etc/environment
+#                 chown -R ec2-user:www-data /var/www
+#                 usermod -a -G www-data ec2-user
+#                 chmod +x /etc/environment
+#                 source /etc/environment
+#                 sudo systemctl daemon-reload
+#                 sudo systemctl start webapp.service
+#                 sudo systemctl enable webapp.service
+#                 npx sequelize db:migrate
+#                 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+#                 -a fetch-config \
+#                 -m ec2 \
+#                 -c file:/opt/aws/amazon-cloudwatch-agent/bin/cloudwatch-config.json \
+#                 -s
+#                 EOF
 
-  tags = {
-    Name = "csye6225-ec2-instance"
-  }
+#   tags = {
+#     Name = "csye6225-ec2-instance"
+#   }
 
-  # attach EBS volumes to the instance
-  ebs_block_device {
-    device_name           = "/dev/sdf"
-    volume_size           = 50
-    volume_type           = "gp2"
-    delete_on_termination = true
-  }
+# attach EBS volumes to the instance
+#   ebs_block_device {
+#     device_name           = "/dev/sdf"
+#     volume_size           = 50
+#     volume_type           = "gp2"
+#     delete_on_termination = true
+#   }
 
-  root_block_device {
-    volume_size           = 50
-    volume_type           = "gp2"
-    delete_on_termination = true
-  }
-  disable_api_termination = false
+#   root_block_device {
+#     volume_size           = 50
+#     volume_type           = "gp2"
+#     delete_on_termination = true
+#   }
+#   disable_api_termination = false
 
-}
+# }
 
 
 resource "aws_security_group" "application" {
@@ -119,33 +119,17 @@ resource "aws_security_group" "application" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 3030
-    to_port     = 3030
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+   // cidr_blocks = ["0.0.0.0/0"]
+
+    security_groups = ["${aws_security_group.load_balancer_sg.id}"]
   }
 
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 3030
+    to_port         = 3030
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.load_balancer_sg.id}"]
   }
-  # ingress {
-  #   from_port   = 5432
-  #   to_port     = 5432
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
 
   egress {
     from_port   = 0
@@ -153,6 +137,7 @@ resource "aws_security_group" "application" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 
 
 }
@@ -221,10 +206,10 @@ resource "aws_iam_role" "ec2-role" {
     ]
   })
 }
-resource "aws_iam_role_policy_attachment" "rds_access" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
-  role       = aws_iam_role.ec2-role.name
-}
+# resource "aws_iam_role_policy_attachment" "rds_access" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+#   role       = aws_iam_role.ec2-role.name
+# }
 
 // Attaching cloudAgent policy to ec2 instance iam role
 resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
