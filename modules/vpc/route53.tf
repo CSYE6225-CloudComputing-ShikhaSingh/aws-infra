@@ -19,3 +19,7 @@ data "aws_route53_zone" "selected" {
   name         = var.domain_name
   private_zone = false
 }
+
+resource "aws_cloudwatch_log_group" "csye6225"{
+  name = "csye6225"
+}
