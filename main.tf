@@ -33,6 +33,8 @@ module "vpc" {
   identifier        = var.identifier
   AWS_REGION        = var.AWS_REGION
   domain_name       = var.domain_name
+  certificate_arn   = var.certificate_arn
+  account_id        = var.account_id
 }
 
 
@@ -117,4 +119,12 @@ variable "domain_name" {
 variable "AWS_REGION" {
   type    = string
   default = "us-east-1"
+}
+
+variable "certificate_arn" {
+  type = string
+}
+
+variable "account_id" {
+  type = string
 }

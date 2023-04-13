@@ -51,11 +51,13 @@ resource "aws_launch_template" "asg_launch_config" {
   }
 
   block_device_mappings {
-    device_name = "/dev/sdf"
+    device_name = "/dev/xvda"
 
     ebs {
-      volume_size           = 20
+      volume_size           = 50
       volume_type           = "gp2"
+      encrypted             = true
+      kms_key_id            = aws_kms_key.ebs_encryption.arn
       delete_on_termination = true
     }
   }
@@ -64,37 +66,85 @@ resource "aws_launch_template" "asg_launch_config" {
     Name = "csye6225-instance"
   }
 
-  #     block_device_mappings {
-  #     device_name = "/dev/sdf"
+}
 
-  #         root {
-  #         volume_size           = 50
-  #         volume_type           = "gp2"
-  #         delete_on_termination = true
-  #     }
+resource "aws_kms_key" "ebs_encryption" {
+  description             = "This key is used to encrypt elastic block volume"
+  enable_key_rotation     = true
+  deletion_window_in_days = 10
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions",
+        Effect = "Allow",
+        Principal = {
+          "AWS" : "arn:aws:iam::${var.account_id}:root"
+        },
+        Action   = "kms:*",
+        Resource = "*"
+      },
+      {
+        Sid    = "Enable IAM User Permissions",
+        Effect = "Allow",
+        Principal = {
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+        },
+        Action = [
+          "kms:Create*",
+          "kms:Describe*",
+          "kms:Enable*",
+          "kms:List*",
+          "kms:Put*",
+          "kms:Update*",
+          "kms:Revoke*",
+          "kms:Disable*",
+          "kms:Get*",
+          "kms:Delete*",
+          "kms:TagResource",
+          "kms:UntagResource",
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow use of the key for EBS encryption"
+        Effect = "Allow"
+        Principal = {
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
 
-
-  #   }
-
-
-  #   ebs_block_device {
-  #     device_name           = "/dev/sdf"
-  #     volume_size           = 50
-  #     volume_type           = "gp2"
-  #     delete_on_termination = true
-  #   }
-
-  #   root_block_device {
-  #     volume_size           = 50
-  #     volume_type           = "gp2"
-  #     delete_on_termination = true
-  #   }
-  #   disable_api_termination = false
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow attachment of persistent resources"
+        Effect = "Allow"
+        Principal = {
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+        }
+        Action = [
+          "kms:CreateGrant",
+          "kms:ListGrants",
+          "kms:RevokeGrant",
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 
 
 }
 
-// autoscaling group
+
+# // autoscaling group
 
 resource "aws_autoscaling_group" "asg_webapp" {
 

@@ -115,16 +115,17 @@ resource "aws_security_group" "application" {
   description = "Security group for hosting web application"
   vpc_id      = aws_vpc.vpc.id
 
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-    // cidr_blocks = ["0.0.0.0/0"]
+  # ingress {
+  #   from_port = 22
+  #   to_port   = 22
+  #   protocol  = "tcp"
+  #   // cidr_blocks = ["0.0.0.0/0"]
 
-    security_groups = ["${aws_security_group.load_balancer_sg.id}"]
-  }
+  #   security_groups = ["${aws_security_group.load_balancer_sg.id}"]
+  # }
 
   ingress {
+    description     = "Allow Load Balancer Access"
     from_port       = 3030
     to_port         = 3030
     protocol        = "tcp"
@@ -138,8 +139,6 @@ resource "aws_security_group" "application" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-
-
 }
 
 resource "aws_security_group" "database" {
@@ -148,6 +147,7 @@ resource "aws_security_group" "database" {
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
+    description     = "Allow Postgres access"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -239,11 +239,6 @@ resource "random_string" "bucket_name" {
 
 //s3 bucket
 
-resource "aws_kms_key" "mykey" {
-  description             = "This key is used to encrypt bucket objects"
-  enable_key_rotation     = true
-  deletion_window_in_days = 10
-}
 
 resource "aws_s3_bucket" "s3-private-bucket" {
   bucket        = "mybucket-${random_string.bucket_name.result}-${var.environment_name}"
@@ -349,12 +344,85 @@ resource "aws_db_instance" "database_instance" {
   parameter_group_name   = aws_db_parameter_group.parameter_groups.name
   apply_immediately      = true
   db_subnet_group_name   = aws_db_subnet_group.private_subnet_for_rds_instance.name
+  kms_key_id             = aws_kms_key.rds_encryption_key.arn
+  storage_encrypted      = true
   multi_az               = false
   publicly_accessible    = false
   allocated_storage      = var.allocated_storage
   skip_final_snapshot    = true
 }
 
+resource "aws_kms_key" "rds_encryption_key" {
+
+  description             = "key for rds encryption"
+  deletion_window_in_days = 10
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions",
+        Effect = "Allow",
+        Principal = {
+          "AWS" : "arn:aws:iam::380893566509:root"
+        },
+        Action   = "kms:*",
+        Resource = "*"
+      },
+      {
+        Sid    = "Enable IAM User Permissions",
+        Effect = "Allow",
+        Principal = {
+          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+        },
+        Action = [
+          "kms:Create*",
+          "kms:Describe*",
+          "kms:Enable*",
+          "kms:List*",
+          "kms:Put*",
+          "kms:Update*",
+          "kms:Revoke*",
+          "kms:Disable*",
+          "kms:Get*",
+          "kms:Delete*",
+          "kms:TagResource",
+          "kms:UntagResource",
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow use of the key for RDS encryption"
+        Effect = "Allow"
+        Principal = {
+          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow attachment of persistent resources"
+        Effect = "Allow"
+        Principal = {
+          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+        }
+        Action = [
+          "kms:CreateGrant",
+          "kms:ListGrants",
+          "kms:RevokeGrant",
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 data "aws_db_instance" "database_data" {
   db_instance_identifier = aws_db_instance.database_instance.name
 }
@@ -373,6 +441,8 @@ resource "aws_db_subnet_group" "private_subnet_for_rds_instance" {
     Name = "RDS subnet group"
   }
 }
+
+
 
 
 

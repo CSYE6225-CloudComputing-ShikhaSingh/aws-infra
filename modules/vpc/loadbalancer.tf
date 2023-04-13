@@ -10,15 +10,17 @@ resource "aws_lb" "load-balancer" {
 
   tags = {
     Application = "WebApp"
-
   }
 }
 
 resource "aws_lb_listener" "lb_listener" {
   load_balancer_arn = aws_lb.load-balancer.arn
-  port              = "80"
-  protocol          = "HTTP"
-
+  # port              = "80"
+  # protocol          = "HTTP"
+  port            = "443"
+  protocol        = "HTTPS"
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.certificate_arn // demo account
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.application-target-group.arn
@@ -49,12 +51,12 @@ resource "aws_security_group" "load_balancer_sg" {
   description = "Security group for load balancer to access web application"
   vpc_id      = aws_vpc.vpc.id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   from_port   = 80
+  #   to_port     = 80
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 
   ingress {
     from_port   = 443
