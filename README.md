@@ -116,8 +116,24 @@ This will remove all resources created by Terraform.
 Conclusion
 This guide provided instructions for setting up our infrastructure using Terraform. By following these steps, we can easily manage your infrastructure, making changes and updates with confidence.
 
+// command to import the certificate
+
+aws iam upload-server-certificate --server-certificate-name certificate_object_name --certificate-body file://*path to your certificate file* --private-key file://*path to your private key file* --certificate-chain file://*path to your CA-bundle file*
 
 
-  
+// to verify the certificate information
+
+aws iam get-server-certificate --server-certificate-name certificate_object_name
+
+openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
+
+openssl rsa -in server.key -outform PEM > server.private.pem
 
 
+aws iam upload-server-certificate --server-certificate-name star.thorntech.com --certificate-body file://STAR_thorntech_com.crt --private-key file://server.private.pem --certificate-chain file://server.chain
+
+
+openssl x509 -in demo_ss-csye6225_me.crt -out mycert.pem -outform PEM
+openssl x509 -in demo_ss-csye6225_me.crt -outform PEM > mycert.pem
+
+openssl x509 -noout -text -in ~/Desktop/yourcertificate.crt  
