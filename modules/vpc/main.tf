@@ -363,7 +363,7 @@ resource "aws_kms_key" "rds_encryption_key" {
         Sid    = "Enable IAM User Permissions",
         Effect = "Allow",
         Principal = {
-          "AWS" : "arn:aws:iam::380893566509:root"
+          "AWS" : "arn:aws:iam::${var.account_id}:root"
         },
         Action   = "kms:*",
         Resource = "*"
@@ -372,7 +372,7 @@ resource "aws_kms_key" "rds_encryption_key" {
         Sid    = "Enable IAM User Permissions",
         Effect = "Allow",
         Principal = {
-          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
         },
         Action = [
           "kms:Create*",
@@ -396,7 +396,7 @@ resource "aws_kms_key" "rds_encryption_key" {
         Sid    = "Allow use of the key for RDS encryption"
         Effect = "Allow"
         Principal = {
-          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
         }
         Action = [
           "kms:Encrypt",
@@ -411,7 +411,7 @@ resource "aws_kms_key" "rds_encryption_key" {
         Sid    = "Allow attachment of persistent resources"
         Effect = "Allow"
         Principal = {
-          "AWS" : "arn:aws:iam::380893566509:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+          "AWS" : "arn:aws:iam::${var.account_id}:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
         }
         Action = [
           "kms:CreateGrant",
