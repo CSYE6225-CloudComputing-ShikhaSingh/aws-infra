@@ -63,8 +63,10 @@ Prerequisites
 Before getting started, you will need the following:
 
 An AWS account with appropriate permissions to create Route 53 hosted zones and records.
+
 A registered domain name that you want to use with Route 53.
 The IP address of the server or resource you want to create a record for.
+
 Creating a Route 53 Hosted Zone
 Log in to the AWS Management Console and navigate to the Route 53 dashboard.
 Click on "Create Hosted Zone".
@@ -116,9 +118,37 @@ This will remove all resources created by Terraform.
 Conclusion
 This guide provided instructions for setting up our infrastructure using Terraform. By following these steps, we can easily manage your infrastructure, making changes and updates with confidence.
 
+
+Assignment 8 and 9:
+
+Adding Load Balancing, Autoscaling, and Certificates using Terraform
+This README file outlines the steps to use Terraform to add load balancing, autoscaling, and SSL/TLS certificates to your web application.
+
+Load Balancing
+Load balancing distributes incoming traffic across multiple servers to improve application performance and availability. Here are the general steps to add load balancing to your web application using Terraform:
+
+Define a load balancer resource in your Terraform configuration file, specifying the load balancer type (e.g., ELB, ALB, NLB) and other relevant parameters.
+Define an autoscaling group resource in your Terraform configuration file, specifying the instance type, AMI, and other relevant parameters.
+Define a launch configuration resource in your Terraform configuration file, specifying the user data script to install and configure your web server software.
+Configure your load balancer to distribute traffic evenly across multiple instances, using a target group resource in your Terraform configuration file.
+Point your domain name to the load balancer's DNS name.
+Autoscaling
+Autoscaling automatically adjusts the number of servers in your application's cluster based on changes in demand. Here are the general steps to add autoscaling to your web application using Terraform:
+
+Define an autoscaling group resource in your Terraform configuration file, specifying the minimum and maximum number of instances, scaling policies, and other relevant parameters.
+Configure your load balancer to automatically add new instances to the target group as they are launched.
+Certificates
+SSL/TLS certificates encrypt data transmitted between your web server and clients, such as web browsers. Here are the general steps to add SSL/TLS certificates to your web application using Terraform:
+
+Define an SSL/TLS certificate resource in your Terraform configuration file, specifying the certificate data and other relevant parameters.
+Configure your load balancer to use the certificate for HTTPS connections, using a listener resource in your Terraform configuration file.
+Conclusion
+By following these steps, you can use Terraform to add load balancing, autoscaling, and SSL/TLS certificates to your web application. These features can help improve performance, availability, and security, respectively. Terraform allows you to manage your infrastructure as code, making it easier to provision, update, and manage your resources.
+
+
 // command to import the certificate
 
-aws iam upload-server-certificate --server-certificate-name certificate_object_name --certificate-body file://*path to your certificate file* --private-key file://*path to your private key file* --certificate-chain file://*path to your CA-bundle file*
+aws iam upload-server-certificate --server-certificate-name demo_ss-csye6225_me.crt --certificate-body file://*path to your certificate file* --private-key file://*path to your private key file* --certificate-chain file://*path to your CA-bundle file*
 
 
 // to verify the certificate information
@@ -127,13 +157,12 @@ aws iam get-server-certificate --server-certificate-name certificate_object_name
 
 openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
 
+// to generate the private key
 openssl rsa -in server.key -outform PEM > server.private.pem
 
-
-aws iam upload-server-certificate --server-certificate-name star.thorntech.com --certificate-body file://STAR_thorntech_com.crt --private-key file://server.private.pem --certificate-chain file://server.chain
-
-
+// to convert the certificate in pem format
 openssl x509 -in demo_ss-csye6225_me.crt -out mycert.pem -outform PEM
+
 openssl x509 -in demo_ss-csye6225_me.crt -outform PEM > mycert.pem
 
 openssl x509 -noout -text -in ~/Desktop/yourcertificate.crt  
